@@ -1,0 +1,17 @@
+Why ?
+pour centraliser la sauvegarde et l'administration des BDD
+ 
+Si première utilisation :
+
+docker network create mysqlnet
+docker volume create --name mysql-server_data
+docker volume create --name mysql-server_dumps
+rsync -itrlpgovDHXP var_lib_mysql/* /var/lib/docker-latest/volumes/mysql-server_data/_data/
+chcon -Rt svirt_sandbox_file_t /var/lib/docker-latest/volumes/mysql-server_data/_data/
+chcon -Rt svirt_sandbox_file_t /var/lib/docker-latest/volumes/mysql-server_dumps/_data/
+
+Utilisation :
+
+Les droits des fichiers doivent être corrigés avant de lancer la stack avec docker-compose up -d :
+chcon -u system_u -r object_r -t svirt_sandbox_file_t crontab
+chcon -u system_u -r object_r -t svirt_sandbox_file_t nettoyer_quotas.sh
