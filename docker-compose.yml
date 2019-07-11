@@ -3,7 +3,8 @@ version: "2.1"
 services:
 
   mysql-server:
-    image: mysql-server
+    image: mysql-server:$VERSION_MYSQL
+    build: "https://git.scimetis.net/yohan/docker-mysql.git"
     container_name: mysql-server
     restart: always
     networks:
@@ -12,9 +13,11 @@ services:
       - mysql-server_data:/var/lib/mysql:Z
       - mysql-server_dumps:/mnt/dumps:Z
       - ./nettoyer_quotas.sh:/root/nettoyer_quotas.sh:Z
+      - ./debian.cnf:/etc/mysql/debian.cnf:Z
  
   cron:
-    image: cron
+    image: cron:$VERSION_CRON
+    build: "https://git.scimetis.net/yohan/docker-cron.git"
     restart: always
     network_mode: "host"
     volumes:
