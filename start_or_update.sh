@@ -7,4 +7,5 @@ unset VERSION_MYSQL VERSION_CRON
 VERSION_MYSQL=$(git ls-remote ssh://git@git.scimetis.net:2222/yohan/docker-mysql.git| head -1 | cut -f 1|cut -c -10) \
 VERSION_CRON=$(git ls-remote ssh://git@git.scimetis.net:2222/yohan/docker-cron.git| head -1 | cut -f 1|cut -c -10) \
  sudo -E bash -c 'docker-compose up -d --force-recreate'
-rm -f crontab debian.cnf
+# We cannot remove the secrets files or restarting the container would become impossible
+#rm -f crontab debian.cnf
