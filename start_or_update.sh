@@ -1,6 +1,8 @@
 #!/bin/bash
-test -f ~/secrets.tar.gz.enc || curl -o ~/secrets.tar.gz.enc https://cloud.scimetis.net/s/$KEY/download
-openssl enc -aes-256-cbc -d -in ~/secrets.tar.gz.enc | tar -zxv --strip 2 secrets/docker-mysql-stack/crontab secrets/docker-mysql-stack/debian.cnf
+test -z $1 || HOST="_$1"
+test -z $2 || INSTANCE="_$2"
+test -f ~/secrets.tar.gz.enc || curl -o ~/secrets.tar.gz.enc "https://cloud.scimetis.net/s/${KEY}/download?path=%2F&files=secrets.tar.gz.enc"
+openssl enc -aes-256-cbc -d -in ~/secrets.tar.gz.enc | tar -zxv --strip 2 secrets/docker-mysql-stack${HOST}${INSTANCE}/crontab secrets/docker-mysql-stack${HOST}${INSTANCE}/debian.cnf
 sudo chown root. crontab debian.cnf
 sudo chmod 644 crontab
 # --force-recreate is used to recreate container when crontab file has changed
