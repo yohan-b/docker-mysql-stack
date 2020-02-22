@@ -4,20 +4,20 @@ services:
 
   mysql-server:
     image: mysql-server:$VERSION_MYSQL
-    build: "https://git.scimetis.net/yohan/docker-mysql.git"
+    #build: "https://git.scimetis.net/yohan/docker-mysql.git"
     container_name: mysql-server
     restart: always
     networks:
       - mysqlnet
     volumes:
-      - mysql-server_data:/var/lib/mysql:Z
-      - mysql-server_dumps:/mnt/dumps:Z
+      - /mnt/volumes/mysql-server_data/data:/var/lib/mysql:Z
+      - /mnt/volumes/mysql-server_dumps/data:/mnt/dumps:Z
       - ./nettoyer_quotas.sh:/root/nettoyer_quotas.sh:Z
       - ./debian.cnf:/etc/mysql/debian.cnf:Z
  
   cron:
     image: cron:$VERSION_CRON
-    build: "https://git.scimetis.net/yohan/docker-cron.git"
+    #build: "https://git.scimetis.net/yohan/docker-cron.git"
     restart: always
     network_mode: "host"
     volumes:
@@ -27,12 +27,3 @@ networks:
 
   mysqlnet:
     external: true
-
-volumes:
-
-  mysql-server_data:
-    external: true
-
-  mysql-server_dumps:
-    external: true
-
