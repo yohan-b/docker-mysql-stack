@@ -13,5 +13,4 @@ chcon -Rt svirt_sandbox_file_t /var/lib/docker-latest/volumes/mysql-server_dumps
 Utilisation :
 
 Les droits des fichiers doivent être corrigés avant de lancer la stack avec docker-compose up -d :
-chcon -u system_u -r object_r -t svirt_sandbox_file_t crontab
 chcon -u system_u -r object_r -t svirt_sandbox_file_t nettoyer_quotas.sh

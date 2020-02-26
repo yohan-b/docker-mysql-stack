@@ -15,14 +15,6 @@ services:
       - ./nettoyer_quotas.sh:/root/nettoyer_quotas.sh:Z
       - ./debian.cnf:/etc/mysql/debian.cnf:Z
  
-  cron:
-    image: cron:$VERSION_CRON
-    #build: "https://git.scimetis.net/yohan/docker-cron.git"
-    restart: always
-    network_mode: "host"
-    volumes:
-      - ./crontab:/etc/crontab:Z
- 
 networks:
 
   mysqlnet:

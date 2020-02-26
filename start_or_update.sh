@@ -2,15 +2,15 @@
 test -z $1 || HOST="_$1"
 test -z $2 || INSTANCE="_$2"
 test -f ~/secrets.tar.gz.enc || { echo "ERROR: ~/secrets.tar.gz.enc not found, exiting."; exit 1; }
-openssl enc -aes-256-cbc -d -in ~/secrets.tar.gz.enc | tar -zxv --strip 2 secrets/docker-mysql-stack${HOST}${INSTANCE}/crontab secrets/docker-mysql-stack${HOST}${INSTANCE}/debian.cnf
-sudo chown root. crontab debian.cnf
-sudo chmod 644 crontab
+openssl enc -aes-256-cbc -d -in ~/secrets.tar.gz.enc | tar -zxv --strip 2 secrets/docker-mysql-stack${HOST}${INSTANCE}/debian.cnf
+sudo chown root. debian.cnf
 
 test -f ~/openrc.sh || { echo "ERROR: ~/openrc.sh not found, exiting."; exit 1; }
 source ~/openrc.sh
 INSTANCE=$(/home/yohan/env_py3/bin/openstack server show -c id --format value $(hostname))
 for VOLUME in mysql-server_data mysql-server_dumps
 do
+    mkdir -p /mnt/volumes/${VOLUME}
     if ! mountpoint -q /mnt/volumes/${VOLUME}
     then
          VOLUME_ID=$(/home/yohan/env_py3/bin/openstack volume show ${VOLUME} -c id --format value)
@@ -29,7 +29,7 @@ sudo docker image inspect duplicity:latest &> /dev/null ||{ echo "ERROR: duplici
 
 rm -rf ~/build
 mkdir -p ~/build
-for name in docker-cron docker-mysql
+for name in docker-mysql
 do  
     sudo -E docker run --rm -e SWIFT_USERNAME=$OS_USERNAME \
                             -e SWIFT_PASSWORD=$OS_PASSWORD \
@@ -43,16 +43,14 @@ do
     tar -xzf ~/build/${name}.tar.gz -C ~/build/
 done
 
-unset VERSION_MYSQL VERSION_CRON
+unset VERSION_MYSQL
 DIRECTORY=$(pwd)
 cd ~/build/docker-mysql; export VERSION_MYSQL=$(git show-ref --head| head -1 | cut -f 1|cut -c -10); cd $DIRECTORY
-cd ~/build/docker-cron; export VERSION_CRON=$(git show-ref --head| head -1 | cut -f 1|cut -c -10); cd $DIRECTORY
 
 sudo docker build -t mysql-server:$VERSION_MYSQL ~/build/docker-mysql
-sudo docker build -t cron:$VERSION_CRON ~/build/docker-cron
 
 sudo -E bash -c 'docker-compose up -d --force-recreate'
-# --force-recreate is used to recreate container when crontab file has changed
+# --force-recreate is used to recreate container when a file has changed
 # We cannot remove the secrets files or restarting the container would become impossible
-# rm -f crontab debian.cnf
+# rm -f debian.cnf
 rm -rf ~/build
