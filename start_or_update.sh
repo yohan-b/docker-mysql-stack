@@ -10,7 +10,7 @@ source ~/openrc.sh
 INSTANCE=$(/home/yohan/env_py3/bin/openstack server show -c id --format value $(hostname))
 for VOLUME in mysql-server_data mysql-server_dumps
 do
-    mkdir -p /mnt/volumes/${VOLUME}
+    sudo mkdir -p /mnt/volumes/${VOLUME}
     if ! mountpoint -q /mnt/volumes/${VOLUME}
     then
          VOLUME_ID=$(/home/yohan/env_py3/bin/openstack volume show ${VOLUME} -c id --format value)
