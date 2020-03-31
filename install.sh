@@ -20,11 +20,12 @@ EOF
 
 for VOLUME in $(awk NF $SCRIPTPATH/volume_list | tr -d "[:blank:]")
 do
+    VOLUME_ESCAPED=$(systemd-escape ${VOLUME})
     cat << EOF >> /etc/systemd/system/${STACK}.service
-After=mnt-cinder-volume@${VOLUME}.service
-After=mnt-volumes-${VOLUME}.mount
-Wants=mnt-cinder-volume@${VOLUME}.service
-Requires=mnt-volumes-${VOLUME}.mount
+After=mnt-cinder-volume@${VOLUME_ESCAPED}.service
+After=mnt-volumes-${VOLUME_ESCAPED}.mount
+Wants=mnt-cinder-volume@${VOLUME_ESCAPED}.service
+Requires=mnt-volumes-${VOLUME_ESCAPED}.mount
 
 EOF
 done
