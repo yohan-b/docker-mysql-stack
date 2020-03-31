@@ -6,7 +6,6 @@ services:
     image: mysql-server:$VERSION_MYSQL
     #build: "https://git.scimetis.net/yohan/docker-mysql.git"
     container_name: mysql-server
-    restart: always
     networks:
       - mysqlnet
     volumes:

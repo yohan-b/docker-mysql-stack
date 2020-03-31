@@ -1,26 +1,21 @@
 #!/bin/bash
+#Absolute path to this script
+SCRIPT=$(readlink -f $0)
+#Absolute path this script is in
+SCRIPTPATH=$(dirname $SCRIPT)
+
+cd $SCRIPTPATH
+
 test -z $1 || HOST="_$1"
 test -z $2 || INSTANCE="_$2"
 test -f ~/secrets.tar.gz.enc || { echo "ERROR: ~/secrets.tar.gz.enc not found, exiting."; exit 1; }
-openssl enc -aes-256-cbc -d -in ~/secrets.tar.gz.enc | tar -zxv --strip 2 secrets/docker-mysql-stack${HOST}${INSTANCE}/debian.cnf
+openssl enc -aes-256-cbc -d -in ~/secrets.tar.gz.enc \
+| sudo tar -zxv --strip 2 secrets/docker-mysql-stack${HOST}${INSTANCE}/debian.cnf \
+|| { echo "Could not extract from secrets archive, exiting."; rm -f ~/secrets.tar.gz.enc; exit 1; }
 sudo chown root. debian.cnf
 
 test -f ~/openrc.sh || { echo "ERROR: ~/openrc.sh not found, exiting."; exit 1; }
 source ~/openrc.sh
-INSTANCE=$(/home/yohan/env_py3/bin/openstack server show -c id --format value $(hostname))
-for VOLUME in mysql-server_data mysql-server_dumps
-do
-    sudo mkdir -p /mnt/volumes/${VOLUME}
-    if ! mountpoint -q /mnt/volumes/${VOLUME}
-    then
-         VOLUME_ID=$(/home/yohan/env_py3/bin/openstack volume show ${VOLUME} -c id --format value)
-         test -e /dev/disk/by-id/*${VOLUME_ID:0:20} || nova volume-attach $INSTANCE $VOLUME_ID auto
-         sleep 3
-         sudo mount /dev/disk/by-id/*${VOLUME_ID:0:20} /mnt/volumes/${VOLUME}
-         mountpoint -q /mnt/volumes/${VOLUME} || { echo "ERROR: could not mount /mnt/volumes/${VOLUME}, exiting."; exit 1; }
-    fi
-done
-
 export OS_REGION_NAME=GRA
 test -f ~/duplicity_password.sh || { echo "ERROR: ~/duplicity_password.sh not found, exiting."; exit 1; }
 source ~/duplicity_password.sh
@@ -49,7 +44,7 @@ cd ~/build/docker-mysql; export VERSION_MYSQL=$(git show-ref --head| head -1 | c
 
 sudo docker build -t mysql-server:$VERSION_MYSQL ~/build/docker-mysql
 
-sudo -E bash -c 'docker-compose up -d --force-recreate'
+sudo -E bash -c 'docker-compose up --no-start --force-recreate'
 # --force-recreate is used to recreate container when a file has changed
 # We cannot remove the secrets files or restarting the container would become impossible
 # rm -f debian.cnf
